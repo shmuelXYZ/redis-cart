@@ -3,5 +3,5 @@ import type { PropsWithChildren } from 'react';
 export default function Main(props: PropsWithChildren) {
   const { children } = props;
 
-  return <main className='flex size-full items-center justify-between bg-white dark:bg-[#383838]'>{children}</main>;
+  return <main className='size-full bg-white max-h-[95vh] overflow-y-scroll dark:bg-[#383838]'>{children}</main>;
 }

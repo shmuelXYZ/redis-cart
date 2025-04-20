@@ -11,7 +11,7 @@ const app = express();
 app.use((express.json()));
 app.use(cors({
     methods: ['GET', 'DELETE'],
-    origin: ['http://localhost:3001'],
+    origin: ['http://localhost:3005'],
     credentials: true
 }))
 app.use(helmet());

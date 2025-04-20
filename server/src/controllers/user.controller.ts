@@ -26,7 +26,7 @@ export const userController = {
             if (!age || !name) throw new Error('must provide age and name');
             validUser(req.body);
 
-            addUser(name, age);
+            addUser(req.body);
             res.status(201).json(usersStub);
         } catch (error) {
             next(error);

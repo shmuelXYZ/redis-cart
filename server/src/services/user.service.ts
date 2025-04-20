@@ -8,9 +8,9 @@ const getAllUsers = (): User[] => {
     }
 }
 
-const addUser = (name: string, age: number): User[] => {
+const addUser = (user: User): User[] => {
     try {
-        usersStub.push({ name, age })
+        usersStub.push(user)
         return usersStub;
     } catch (error: any) {
         throw new Error(error.message)
