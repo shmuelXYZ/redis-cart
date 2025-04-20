@@ -17,6 +17,7 @@ export class BasketRepository {
     }
 
     async getBasket(): Promise<TechItem[]> {
+        // GET SET SETEX...
         const basket = await this.redisClient.getClient().GET('basket');
         return basket ? JSON.parse(basket) : [];
     }
@@ -26,13 +27,13 @@ export class BasketRepository {
         await this.redisClient.getClient().SETEX('basket', ONE_MONTH, JSON.stringify(basket));
     }
 
-    async addItem(item: TechItem): Promise<void> {
+    async addItem(item: Omit<TechItem, 'quantity'>): Promise<void> {
         const basket = await this.getBasket();
         const index = basket.findIndex(i => i.id === item.id);
         if (index !== -1) {
-            basket[index].quantity += item.quantity;
+            basket[index].quantity += 1;
         } else {
-            basket.push(item);
+            basket.push({ ...item, quantity: 1 });
         }
         await this.editBasket(basket);
     }

@@ -10,7 +10,7 @@ const getBasket = async (): Promise<TechItem[]> => {
     }
 }
 
-const addItem = async (item: TechItem) => {
+const addItem = async (item: Omit<TechItem, 'quantity'>) => {
     try {
         const basketRepository = getBasketRepository();
         await basketRepository.addItem(item);
