@@ -1,21 +1,18 @@
-import { Suspense } from 'react';
-import { Route, Routes } from 'react-router-dom';
-import Layout from './components/Layout';
-import PageNotFound from './pages/PageNotFound';
-import { routes } from './routes';
+import { Route, Routes, BrowserRouter, Navigate } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import BasketPage from './pages/BasketPage';
+import AppLayout from './components/AppLayout';
 
 export default function App() {
   return (
-    <Layout>
-      <Suspense>
-        <Routes>
-          {routes.map(({ to: path, Component }, index) => (
-            <Route key={index} path={path} element={<Component />} />
-          ))}
-
-          <Route path='*' element={<PageNotFound />} />
-        </Routes>
-      </Suspense>
-    </Layout>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route index element={<Navigate replace to='home' />} />
+          <Route path='home' element={<HomePage />} />
+          <Route path='basket' element={<BasketPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
