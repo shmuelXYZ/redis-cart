@@ -1,68 +1,70 @@
-import { createClient, RedisClientType } from 'redis';
-import { REDIS_URI } from './environment-variables';
+import { createClient, RedisClientType } from "redis";
+import { REDIS_URI, REDIS_PASSWORD } from "./environment-variables";
 
 export interface IRedisConnection {
-    connect(): Promise<void>;
-    disconnect(): Promise<void>;
-    isConnected(): boolean;
-    getClient(): RedisClientType;
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
+  isConnected(): boolean;
+  getClient(): RedisClientType;
 }
 
 export class RedisConnection implements IRedisConnection {
-    private client: RedisClientType | null = null;
-    // TODO: add logger later
-    // private logger = new WinstonLogger('Redis');
-    private static instance: RedisConnection;
+  private client: RedisClientType | null = null;
+  private static instance: RedisConnection;
 
-    private constructor() { } // Make constructor private for singleton pattern
+  private constructor() {}
 
-    async connect(): Promise<void> {
-        try {
-            this.client = createClient({
-                url: REDIS_URI
-            });
+  async connect(): Promise<void> {
+    try {
+      if (!REDIS_URI) {
+        throw new Error("REDIS_URI environment variable is not defined");
+      }
 
-            // Set up error handling
-            this.client.on('error', (error) => {
-                console.error('Redis Client Error', error);
-                // this.logger.error('Redis Client Error', error);
-            });
+      this.client = createClient({
+        url: REDIS_URI,
+        password: REDIS_PASSWORD || undefined,
+      });
 
-            await this.client.connect();
-            console.log('Connected to Redis');
-            // this.logger.info('Connected to Redis');
-        } catch (error) {
-            console.error('Redis connection failed', error);
-            // this.logger.error('Redis connection failed', error);
-            throw error;
-        }
+      this.client.on("error", (error) => {
+        console.error("Redis Client Error", error);
+      });
+
+      this.client.on("connect", () => {
+        console.log("Connected to Redis");
+      });
+
+      await this.client.connect();
+    } catch (error) {
+      console.error("Redis connection failed", error);
+      throw error;
     }
+  }
 
-    static getInstance(): RedisConnection {
-        if (!RedisConnection.instance) {
-            RedisConnection.instance = new RedisConnection();
-        }
-        return RedisConnection.instance;
+  static getInstance(): RedisConnection {
+    if (!RedisConnection.instance) {
+      RedisConnection.instance = new RedisConnection();
     }
+    return RedisConnection.instance;
+  }
 
-    async disconnect(): Promise<void> {
-        if (this.client) {
-            await this.client.quit();
-            this.client = null;
-            console.log('Disconnected from Redis');
-            // this.logger.info('Disconnected from Redis');
-        }
+  async disconnect(): Promise<void> {
+    if (this.client && this.client.isOpen) {
+      await this.client.quit();
+      this.client = null;
+      console.log("Disconnected from Redis");
     }
+  }
 
-    isConnected(): boolean {
-        return this.client?.isOpen ?? false;
-    }
+  isConnected(): boolean {
+    return this.client?.isOpen ?? false;
+  }
 
-    getClient(): RedisClientType {
-        if (!this.client) throw new Error('RedisClient is not initialized');
-        return this.client;
+  getClient(): RedisClientType {
+    if (!this.client) {
+      throw new Error("RedisClient is not initialized");
     }
+    return this.client;
+  }
 }
 
-// Export the singleton instance getter
 export const getRedisConnection = RedisConnection.getInstance;
