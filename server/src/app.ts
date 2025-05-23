@@ -20,13 +20,19 @@ app.use(helmet());
 // connect to redis
 RedisConnection.getInstance().connect();
 
-app.use("/basket", basketRouter);
+app.use("/", basketRouter);
 
-app.get("/health", (req, res, next) => {
-  next(new Error("error"));
-  res.status(200).json({ message: "OK" });
+// Health check route
+app.get("/health", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Check Redis connection by performing a simple operation
+    await RedisConnection.getInstance().getClient().ping();
+    res.status(200).json({ message: "OK", redis: "Connected" });
+  } catch (error) {
+    // If Redis ping fails, pass the error to the error-handling middleware
+    next(error);
+  }
 });
-
 // error handling
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(error);
